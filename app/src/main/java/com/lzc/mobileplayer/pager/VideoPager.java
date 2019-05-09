@@ -1,29 +1,33 @@
 package com.lzc.mobileplayer.pager;
 
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.lzc.mobileplayer.R;
+import com.lzc.mobileplayer.activity.SystemVideoPlayer;
+import com.lzc.mobileplayer.adapter.VideoPagerAdapter;
 import com.lzc.mobileplayer.base.BasePager;
-import com.lzc.mobileplayer.domain.Mediaitem;
+import com.lzc.mobileplayer.domain.MediaItem;
 import com.lzc.mobileplayer.utils.LogUtil;
 
 import java.util.ArrayList;
-
 
 /**
  * author : 刘子川
@@ -38,24 +42,25 @@ public class VideoPager extends BasePager {
     private TextView tv_nomedia;
     private ProgressBar pd_loading;
 
-    private ArrayList<Mediaitem> mediaitems;
+    private VideoPagerAdapter videoPagerAdapter;
+    private ArrayList<MediaItem> mMediaItems;
 
     public VideoPager(Context context) {
         super(context);
     }
 
-    private Handler handler = new Handler(){
+    private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            if(mediaitems != null && mediaitems.size() >0){
+            if (mMediaItems != null && mMediaItems.size() > 0) {
                 //有数据
                 //设置适配器
-//                videoPagerAdapter = new VideoPagerAdapter(context,mediaitems,true);
-//                mListView.setAdapter(videoPagerAdapter);
+                videoPagerAdapter = new VideoPagerAdapter(context, mMediaItems);
+                mListView.setAdapter(videoPagerAdapter);
                 //把文本隐藏
                 tv_nomedia.setVisibility(View.GONE);
-            }else{
+            } else {
                 //没有数据
                 //文本显示
                 tv_nomedia.setVisibility(View.VISIBLE);
@@ -69,10 +74,14 @@ public class VideoPager extends BasePager {
 
     @Override
     public View initView() {
-        View view = View.inflate(context, R.layout.video_pager,null);
+        View view = View.inflate(context, R.layout.video_pager, null);
         mListView = (ListView) view.findViewById(R.id.list_view);
         tv_nomedia = (TextView) view.findViewById(R.id.tv_nomedia);
         pd_loading = (ProgressBar) view.findViewById(R.id.pd_loading);
+
+        //设置listView的Item的点击事件
+        mListView.setOnItemClickListener(new MyOnItemClickListener());
+
         return view;
     }
 
@@ -92,17 +101,17 @@ public class VideoPager extends BasePager {
      */
     private void getDataFromLocal() {
 
-        mediaitems = new ArrayList<>();
+        mMediaItems = new ArrayList<>();
 
         //用子线程加载数据
-        new Thread(){
+        new Thread() {
             @Override
             public void run() {
                 super.run();
 
                 //设置动态权限
                 isGrantExternalRW((Activity) context);
-                SystemClock.sleep(2000);
+                //SystemClock.sleep(500);
 
                 ContentResolver resolver = context.getContentResolver();
                 Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
@@ -115,26 +124,26 @@ public class VideoPager extends BasePager {
 
                 };
                 Cursor cursor = resolver.query(uri, objs, null, null, null);
-                if(cursor !=null){
-                    while (cursor.moveToNext()){
-                        Mediaitem mediaitem = new Mediaitem();
+                if (cursor != null) {
+                    while (cursor.moveToNext()) {
+                        MediaItem mediaItem = new MediaItem();
 
                         String name = cursor.getString(0);
-                        mediaitem.setName(name);
+                        mediaItem.setName(name);
 
                         long duration = cursor.getLong(1);
-                        mediaitem.setDuration(duration);
+                        mediaItem.setDuration(duration);
 
                         long size = cursor.getLong(2);
-                        mediaitem.setSize(size);
+                        mediaItem.setSize(size);
 
                         String data = cursor.getString(3);
-                        mediaitem.setData(data);
+                        mediaItem.setData(data);
 
                         String artist = cursor.getString(4);
-                        mediaitem.setArtist(artist);
+                        mediaItem.setArtist(artist);
 
-                        mediaitems.add(mediaitem);
+                        mMediaItems.add(mediaItem);
                     }
                     cursor.close();
                 }
@@ -149,6 +158,7 @@ public class VideoPager extends BasePager {
 
     /**
      * 解决安卓6.0以上版本不能读取外部存储权限的问题
+     *
      * @param activity
      * @return
      */
@@ -165,5 +175,26 @@ public class VideoPager extends BasePager {
         }
 
         return true;
+    }
+
+    private class MyOnItemClickListener implements android.widget.AdapterView.OnItemClickListener {
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+            MediaItem mediaItem = mMediaItems.get(position);
+            Toast.makeText(context,"mediaItem=="+mediaItem.toString(),Toast.LENGTH_SHORT).show();
+
+            //1.调用系统所有的播放器-隐式意图
+//            Intent intent = new Intent();
+//            intent.setDataAndType(Uri.parse(mediaItem.getData()),"video/*");
+//            context.startActivity(intent);
+
+            //2.调用自己写的播放器-显示意图
+            Intent intent = new Intent(context,SystemVideoPlayer.class);
+            intent.setDataAndType(Uri.parse(mediaItem.getData()),"video/*");
+            context.startActivity(intent);
+
+        }
     }
 }

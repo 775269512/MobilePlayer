@@ -7,7 +7,7 @@ package com.lzc.mobileplayer.domain;
  * version: 1.0
     代表一个视频和音频
  */
-public class Mediaitem {
+public class MediaItem {
     private String name;
 
     private long duration;
@@ -60,7 +60,7 @@ public class Mediaitem {
 
     @Override
     public String toString() {
-        return "Mediaitem{" +
+        return "MediaItem{" +
                 "name='" + name + '\'' +
                 ", duration=" + duration +
                 ", size=" + size +

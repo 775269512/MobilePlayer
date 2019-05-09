@@ -5,5 +5,8 @@
     <string name="radio_button2">淫秽语音</string>
     <string name="radio_button3">网络色情</string>
     <string name="radio_button4">邪恶段子</string>
+    <string name="tv_name">视频的名称</string>
     <string name="tv_nomedia">没有发现视频</string>
+    <string name="tv_time">视频的时长</string>
+    <string name="tv_size">视频的大小</string>
 </resources>
