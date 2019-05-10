@@ -18,8 +18,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".activity.MainActivity"/>
-        <activity android:name=".activity.SystemVideoPlayer"/>
+        <!--避免横竖屏切换报错-->
+        <activity android:name=".activity.MainActivity"
+                  android:configChanges="keyboardHidden|screenSize|orientation"/>
+        <activity android:name=".activity.SystemVideoPlayer"
+                  android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
+                  android:configChanges="keyboardHidden|screenSize|orientation"/>
     </application>
 
 </manifest>

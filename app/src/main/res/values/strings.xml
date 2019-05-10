@@ -9,4 +9,8 @@
     <string name="tv_nomedia">没有发现视频</string>
     <string name="tv_time">视频的时长</string>
     <string name="tv_size">视频的大小</string>
+    <string name="video_name">视频的名字</string>
+    <string name="tv_system_time">12:00</string>
+    <string name="tv_current_time">00:00</string>
+    <string name="tv_duration">20:00</string>
 </resources>

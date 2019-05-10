@@ -4,11 +4,12 @@ import android.app.Activity;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.widget.MediaController;
+import android.view.MotionEvent;
 import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.lzc.mobileplayer.R;
+import com.lzc.mobileplayer.utils.LogUtil;
 
 /**
  * author : 刘子川
@@ -24,6 +25,7 @@ public class SystemVideoPlayer extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        LogUtil.e("onCreate--");
         setContentView(R.layout.activity_system_video_player);
 
         videoview = (VideoView) findViewById(R.id.videoview);
@@ -44,8 +46,8 @@ public class SystemVideoPlayer extends Activity {
         }
 
 
-        //设置控制面板
-        videoview.setMediaController(new MediaController(this));
+        //设置系统控制面板
+        //videoview.setMediaController(new MediaController(this));
     }
 
     class MyOnPreparedListener implements MediaPlayer.OnPreparedListener {
@@ -76,5 +78,50 @@ public class SystemVideoPlayer extends Activity {
             //playNextVideo();
             Toast.makeText(SystemVideoPlayer.this, "播放完成了="+uri, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        LogUtil.e("onRestart--");
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogUtil.e("onStart--");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LogUtil.e("onResume--");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LogUtil.e("onRestart--");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LogUtil.e("onStop--");
+    }
+
+    @Override
+    protected void onDestroy() {
+        LogUtil.e("onDestroy--");
+        super.onDestroy();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if(event.getAction()==MotionEvent.ACTION_DOWN){
+            
+        }
+        return super.onTouchEvent(event);
     }
 }
