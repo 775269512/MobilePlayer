@@ -59,6 +59,7 @@ public class VideoPagerAdapter extends BaseAdapter {
 
         //根据position得到列表中对应位置的数据
         MediaItem mediaItem = mediaItems.get(position);
+        viewHoder.iv_icon.setImageBitmap(mediaItem.getBitmap());
         viewHoder.tv_name.setText(mediaItem.getName());
         viewHoder.tv_size.setText(Formatter.formatFileSize(context, mediaItem.getSize()));
         viewHoder.tv_time.setText(utils.stringForTime((int) mediaItem.getDuration()));

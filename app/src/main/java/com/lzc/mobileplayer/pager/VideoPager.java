@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -18,7 +20,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.lzc.mobileplayer.R;
 import com.lzc.mobileplayer.activity.SystemVideoPlayer;
@@ -121,7 +122,6 @@ public class VideoPager extends BasePager {
                         MediaStore.Video.Media.SIZE,//视频的文件大小
                         MediaStore.Video.Media.DATA,//视频的绝对地址
                         MediaStore.Video.Media.ARTIST,//歌曲的演唱者
-
                 };
                 Cursor cursor = resolver.query(uri, objs, null, null, null);
                 if (cursor != null) {
@@ -142,6 +142,9 @@ public class VideoPager extends BasePager {
 
                         String artist = cursor.getString(4);
                         mediaItem.setArtist(artist);
+
+                        Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(data,MediaStore.Video.Thumbnails.MINI_KIND);
+                        mediaItem.setBitmap(bitmap);
 
                         mMediaItems.add(mediaItem);
                     }
@@ -183,7 +186,7 @@ public class VideoPager extends BasePager {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
             MediaItem mediaItem = mMediaItems.get(position);
-            Toast.makeText(context,"mediaItem=="+mediaItem.toString(),Toast.LENGTH_SHORT).show();
+//            Toast.makeText(context,"mediaItem=="+mediaItem.toString(),Toast.LENGTH_SHORT).show();
 
             //1.调用系统所有的播放器-隐式意图
 //            Intent intent = new Intent();

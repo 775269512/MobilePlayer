@@ -1,5 +1,7 @@
 package com.lzc.mobileplayer.domain;
 
+import android.graphics.Bitmap;
+
 /**
  * author : 刘子川
  * e-mail : 775269512@qq.com
@@ -17,6 +19,16 @@ public class MediaItem {
     private String data;
 
     private String artist;
+
+    public Bitmap getBitmap() {
+        return bitmap;
+    }
+
+    public void setBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
+    }
+
+    private Bitmap bitmap;
 
     public long getDuration() {
         return duration;

@@ -23,7 +23,8 @@
                   android:configChanges="keyboardHidden|screenSize|orientation"/>
         <activity android:name=".activity.SystemVideoPlayer"
                   android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
-                  android:configChanges="keyboardHidden|screenSize|orientation"/>
+                  android:configChanges="keyboardHidden|screenSize|orientation"
+                  android:screenOrientation="sensor"/>
     </application>
 
 </manifest>
