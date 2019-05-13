@@ -1,6 +1,8 @@
 package com.lzc.mobileplayer.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.text.format.Formatter;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +21,9 @@ public class VideoPagerAdapter extends BaseAdapter {
     private Context context;
     private final ArrayList<MediaItem> mediaItems;
     private Utils utils;
+    private MediaMetadataRetriever media;
+    private Bitmap bitmap;
+
 
     public VideoPagerAdapter(Context context,ArrayList<MediaItem> mediaItems){
         this.context = context;
@@ -59,7 +64,13 @@ public class VideoPagerAdapter extends BaseAdapter {
 
         //根据position得到列表中对应位置的数据
         MediaItem mediaItem = mediaItems.get(position);
-        viewHoder.iv_icon.setImageBitmap(mediaItem.getBitmap());
+
+        //设置视频的第一秒为封面
+        media = new MediaMetadataRetriever();
+        media.setDataSource(mediaItem.getData());// videoPath 本地视频的路径
+        bitmap  = media.getFrameAtTime(10, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
+
+        viewHoder.iv_icon.setImageBitmap(bitmap);
         viewHoder.tv_name.setText(mediaItem.getName());
         viewHoder.tv_size.setText(Formatter.formatFileSize(context, mediaItem.getSize()));
         viewHoder.tv_time.setText(utils.stringForTime((int) mediaItem.getDuration()));

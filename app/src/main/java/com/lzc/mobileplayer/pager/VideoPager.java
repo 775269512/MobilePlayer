@@ -8,10 +8,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
@@ -126,6 +125,7 @@ public class VideoPager extends BasePager {
                 Cursor cursor = resolver.query(uri, objs, null, null, null);
                 if (cursor != null) {
                     while (cursor.moveToNext()) {
+
                         MediaItem mediaItem = new MediaItem();
 
                         String name = cursor.getString(0);
@@ -143,8 +143,9 @@ public class VideoPager extends BasePager {
                         String artist = cursor.getString(4);
                         mediaItem.setArtist(artist);
 
-                        Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(data,MediaStore.Video.Thumbnails.MINI_KIND);
-                        mediaItem.setBitmap(bitmap);
+//                        //设置视频的第一秒为封面
+//                        media.setDataSource(data);// videoPath 本地视频的路径
+//                        Bitmap bitmap  = media.getFrameAtTime(10, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
 
                         mMediaItems.add(mediaItem);
                     }
@@ -194,10 +195,18 @@ public class VideoPager extends BasePager {
 //            context.startActivity(intent);
 
             //2.调用自己写的播放器-显示意图
-            Intent intent = new Intent(context,SystemVideoPlayer.class);
-            intent.setDataAndType(Uri.parse(mediaItem.getData()),"video/*");
-            context.startActivity(intent);
+//            Intent intent = new Intent(context,SystemVideoPlayer.class);
+//            intent.setDataAndType(Uri.parse(mediaItem.getData()),"video/*");
+//            context.startActivity(intent);
 
+            //3.传递列表数据，如果是对象，需要序列化
+            Intent intent = new Intent(context,SystemVideoPlayer.class);
+
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("videolist",mMediaItems);
+            intent.putExtras(bundle);
+            intent.putExtra("position",position);
+            context.startActivity(intent);
         }
     }
 }

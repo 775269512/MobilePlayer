@@ -1,6 +1,6 @@
 package com.lzc.mobileplayer.domain;
 
-import android.graphics.Bitmap;
+import java.io.Serializable;
 
 /**
  * author : 刘子川
@@ -9,7 +9,7 @@ import android.graphics.Bitmap;
  * version: 1.0
     代表一个视频和音频
  */
-public class MediaItem {
+public class MediaItem implements Serializable {
     private String name;
 
     private long duration;
@@ -20,15 +20,6 @@ public class MediaItem {
 
     private String artist;
 
-    public Bitmap getBitmap() {
-        return bitmap;
-    }
-
-    public void setBitmap(Bitmap bitmap) {
-        this.bitmap = bitmap;
-    }
-
-    private Bitmap bitmap;
 
     public long getDuration() {
         return duration;
