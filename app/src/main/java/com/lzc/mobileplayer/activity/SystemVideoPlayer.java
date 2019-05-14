@@ -344,7 +344,8 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         getData();
         setData();
 
-        //设置系统控制面板
+
+    //设置系统控制面板
         //videoview.setMediaController(new MediaController(this));
     }
 
@@ -642,6 +643,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
 
         LogUtil.e("onDestroy--");
         super.onDestroy();
+
     }
 
     @Override

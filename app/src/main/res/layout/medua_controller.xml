@@ -134,14 +134,14 @@
 
             <Button
                 android:id="@+id/btn_exit"
-                android:layout_marginLeft="50dp"
+                android:layout_marginLeft="40dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/btn_exit_selector" />
 
             <Button
-                android:layout_marginLeft="20dp"
+                android:layout_marginLeft="15dp"
                 android:id="@+id/btn_video_pre"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -151,7 +151,7 @@
 
             <Button
                 android:id="@+id/btn_video_start_pause"
-                android:layout_marginLeft="20dp"
+                android:layout_marginLeft="15dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -160,15 +160,14 @@
             <Button
                 android:id="@+id/btn_video_next"
                 android:layout_width="wrap_content"
-                android:layout_marginLeft="20dp"
+                android:layout_marginLeft="15dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/btn_video_next_selector" />
 
             <Button
                 android:layout_marginRight="30dp"
-                android:layout_marginLeft="20dp"
-
+                android:layout_marginLeft="15dp"
                 android:id="@+id/btn_video_siwch_screen"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
