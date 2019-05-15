@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="3dp"
+    android:visibility="gone"
+    android:background="#33000000"
+    android:layout_centerInParent="true"
+    android:gravity="center">
+
+    <ProgressBar
+        android:layout_width="30dp"
+        android:layout_height="30dp"/>
+    <TextView
+        android:gravity="center"
+        android:id="@+id/tv_netspeed"
+        android:layout_marginLeft="3dp"
+        android:textSize="10sp"
+        android:textColor="#ffffff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/tv_buffer"/>
+</LinearLayout>

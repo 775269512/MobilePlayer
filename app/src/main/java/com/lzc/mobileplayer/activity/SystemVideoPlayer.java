@@ -1,12 +1,15 @@
 package com.lzc.mobileplayer.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.icu.text.DateFormat;
 import android.icu.text.SimpleDateFormat;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -16,6 +19,7 @@ import android.os.Message;
 import android.support.annotation.RequiresApi;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -69,6 +73,18 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
     private Button btnVideoStartPause;
     private Button btnVideoNext;
     private Button btnVideoSiwchScreen;
+    private TextView tv_netspeed;
+    private TextView tv_loading_newspeed;
+    private LinearLayout ll_loading;
+    private LinearLayout ll_buffer;
+
+
+    /**
+     * 调节声音
+     */
+    private AudioManager am;
+    private int currentVoice;
+    private int maxVoice;
 
     private Utils mUtils;
     //监听电量变化的广播
@@ -102,6 +118,10 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
      */
     private static final int DEFAULT_SCREEN = 2;
     /**
+     * 显示网速
+     */
+    private static final int SHOW_SPEED = 3;
+    /**
      * 屏幕的大小
      */
     private int screenWidth = 0;
@@ -111,6 +131,15 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
      */
     private int videoWidth = 0 ;
     private int videoHeight = 0;
+
+    /**
+     * 是否是静音
+     */
+    private boolean isMute = false;
+    /**
+     * 是否是网络资源
+     */
+    private boolean isNetUri;
 
 
     /**
@@ -125,6 +154,8 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         media_controller = (RelativeLayout) findViewById(R.id.media_controller);
         videoview = (VideoView) findViewById(R.id.videoview);
         llTop = (LinearLayout)findViewById( R.id.ll_top );
+        ll_buffer = (LinearLayout)findViewById( R.id.ll_buffer );
+        ll_loading = (LinearLayout)findViewById( R.id.ll_loading );
         tvName = (TextView)findViewById( R.id.tv_name );
         ivBattery = (ImageView)findViewById( R.id.iv_battery );
         tvSystemTime = (TextView)findViewById( R.id.tv_system_time );
@@ -133,6 +164,8 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         btnSwichPlayer = (Button)findViewById( R.id.btn_swich_player );
         llBottom = (LinearLayout)findViewById( R.id.ll_bottom );
         tvCurrentTime = (TextView)findViewById( R.id.tv_current_time );
+        tv_loading_newspeed = (TextView)findViewById( R.id.tv_loading_newspeed );
+        tv_netspeed = (TextView)findViewById( R.id.tv_netspeed );
         seekbarVideo = (SeekBar)findViewById( R.id.seekbar_video );
         tvDuration = (TextView)findViewById( R.id.tv_duration );
         btnExit = (Button)findViewById( R.id.btn_exit );
@@ -148,6 +181,10 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         btnVideoStartPause.setOnClickListener( this );
         btnVideoNext.setOnClickListener( this );
         btnVideoSiwchScreen.setOnClickListener( this );
+
+        //开始更新网速
+        handler.sendEmptyMessage(SHOW_SPEED);
+
     }
 
     /**
@@ -159,9 +196,12 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
     @Override
     public void onClick(View v) {
         if ( v == btVoice ) {
+            isMute = (!isMute);
             // Handle clicks for btVoice
+            updataVoice(currentVoice,isMute);
         } else if ( v == btnSwichPlayer ) {
             // Handle clicks for btnSwichPlayer
+            showSwichPlayerDialog();
         } else if ( v == btnExit ) {
             // Handle clicks for btnExit
             finish();
@@ -183,6 +223,20 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
 
         handler.removeMessages(HIDE_MEDIACONTROLLER);
         handler.sendEmptyMessageDelayed(HIDE_MEDIACONTROLLER,4000);
+    }
+
+    private void showSwichPlayerDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("提示");
+        builder.setMessage("AV有码？万能播放器！");
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                startVitamioPlayer();
+            }
+        });
+        builder.setNegativeButton("取消",null);
+        builder.show();
     }
 
     /**
@@ -210,8 +264,10 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
             //播放上一个
             position--;
             if(position>=0){
+                ll_loading.setVisibility(View.VISIBLE);
                 MediaItem mediaItem = mediaItems.get(position);
                 tvName.setText(mediaItem.getName());
+                isNetUri = mUtils.isNetUri(mediaItem.getData());
                 videoview.setVideoPath(mediaItem.getData());
 
                 //设置按钮状态
@@ -231,8 +287,10 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
             //播放下一个
             position++;
             if(position<mediaItems.size()){
+                ll_loading.setVisibility(View.VISIBLE);
                 MediaItem mediaItem = mediaItems.get(position);
                 tvName.setText(mediaItem.getName());
+                isNetUri = mUtils.isNetUri(mediaItem.getData());
                 videoview.setVideoPath(mediaItem.getData());
 
                 //设置按钮状态
@@ -296,6 +354,16 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
             super.handleMessage(msg);
 
             switch (msg.what){
+                case SHOW_SPEED:
+                    String netSpeed = mUtils.getNetSpeed(SystemVideoPlayer.this);
+                    //显示网络速度
+                    tv_loading_newspeed.setText("AV玩命加载中.."+netSpeed);
+                    tv_netspeed.setText("AV缓冲中.."+netSpeed);
+                    //两秒更新一次
+                    handler.removeMessages(SHOW_SPEED);
+                    handler.sendEmptyMessageDelayed(SHOW_SPEED,2000);
+
+                    break;
                 case PROGRESS:
 
                     //1.得到当前的播放视频进度
@@ -308,6 +376,18 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
 
                     //设置系统时间
                     tvSystemTime.setText(getSysteTime());
+
+                    //缓冲进度的更新
+                    if(isNetUri){
+                        //网络缓冲
+                        int buffer = videoview.getBufferPercentage();
+                        int totalBuffer = seekbarVideo.getMax()*buffer;
+                        int secondaryProgress = totalBuffer/100;
+                        seekbarVideo.setSecondaryProgress(secondaryProgress);
+                    }else {
+                        //本地没缓冲
+                        seekbarVideo.setSecondaryProgress(0);
+                    }
 
                     //3.每秒更新一次
                     handler.removeMessages(PROGRESS);
@@ -354,10 +434,12 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
 
             MediaItem mediaItem = mediaItems.get(position);
             tvName.setText(mediaItem.getName());//设置视频的名称
+            isNetUri = mUtils.isNetUri(mediaItem.getData());
             videoview.setVideoPath(mediaItem.getData());
 
         }else if (uri != null){
             tvName.setText(uri.toString());//设置视频的名称
+            isNetUri = mUtils.isNetUri(uri.toString());
             videoview.setVideoURI(uri);
 
         }else {
@@ -420,6 +502,16 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         screenWidth = displayMetrics.widthPixels;
         screenHeight =displayMetrics.heightPixels;
+
+        //得到音量
+        am = (AudioManager) getSystemService(AUDIO_SERVICE);
+        currentVoice = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+        maxVoice = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        //设置最大音量
+        seekbarVoice.setMax(maxVoice);
+        //设置当前音量
+        seekbarVoice.setProgress(currentVoice);
+
     }
 
     private void setFullScreenAndDefault() {
@@ -509,6 +601,111 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
 
         //设置seekBar状态变化监听
         seekbarVideo.setOnSeekBarChangeListener(new VideoOnSeekBarChangeListener());
+
+        //设置音乐seekBar状态变化监听
+        seekbarVoice.setOnSeekBarChangeListener(new VoiceOnSeekBarChangeListener());
+
+        //监听视频卡 - 系统的api
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            videoview.setOnInfoListener(new MyOnInfoListener());
+        }
+    }
+
+    class MyOnInfoListener implements MediaPlayer.OnInfoListener{
+
+        /**
+         * Called to indicate an info or a warning.
+         *
+         * @param mp    the MediaPlayer the info pertains to.
+         * @param what  the type of info or warning.
+
+         * @param extra an extra code, specific to the info. Typically
+         *              implementation dependent.
+         * @return True if the method handled the info, false if it didn't.
+         * Returning false, or not having an OnInfoListener at all, will
+         * cause the info to be discarded.
+         */
+        @Override
+        public boolean onInfo(MediaPlayer mp, int what, int extra) {
+            switch (what){
+                case MediaPlayer.MEDIA_INFO_BUFFERING_START:
+                    ll_buffer.setVisibility(View.VISIBLE);
+                    break;
+                case MediaPlayer.MEDIA_INFO_BUFFERING_END:
+                    ll_buffer.setVisibility(View.GONE);
+                    break;
+            }
+            return true;
+        }
+    }
+
+    class VoiceOnSeekBarChangeListener implements SeekBar.OnSeekBarChangeListener{
+
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if(fromUser){
+                if(progress>0){
+                    isMute = false;
+                }else {
+                    isMute = true;
+                }
+                updataVoice(progress,isMute);
+            }
+        }
+
+        /**
+         * Notification that the user has started a touch gesture. Clients may want to use this
+         * to disable advancing the seekbar.
+         *
+         * @param seekBar The SeekBar in which the touch gesture began
+         */
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            handler.removeMessages(HIDE_MEDIACONTROLLER);
+        }
+
+        /**
+         * Notification that the user has finished a touch gesture. Clients may want to use this
+         * to re-enable advancing the seekbar.
+         *
+         * @param seekBar The SeekBar in which the touch gesture began
+         */
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            handler.sendEmptyMessageDelayed(HIDE_MEDIACONTROLLER,4000);
+        }
+    }
+
+    /**
+     * 设置音量大小
+     * @param progress
+     */
+    private void updataVoice(int progress,boolean isMute) {
+        if(isMute){
+            am.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
+            seekbarVoice.setProgress(0);
+            currentVoice = progress;
+        }else {
+            am.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0);
+            seekbarVoice.setProgress(progress);
+            currentVoice = progress;
+        }
+    }
+
+    /**
+     * 设置音量大小
+     * @param progress
+     */
+    private void updataVoice2(int progress,boolean isMute) {
+        if(isMute){
+            am.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 1);
+            seekbarVoice.setProgress(0);
+            currentVoice = progress;
+        }else {
+            am.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 1);
+            seekbarVoice.setProgress(progress);
+            currentVoice = progress;
+        }
     }
 
     class VideoOnSeekBarChangeListener implements SeekBar.OnSeekBarChangeListener{
@@ -577,6 +774,16 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
 //            videoview.setVideoSize(mp.getVideoWidth(),mp.getVideoHeight());
             //屏幕的默认播放
             setVideoTpye(DEFAULT_SCREEN);
+
+            //消失加载页面
+            ll_loading.setVisibility(View.GONE);
+
+//            mp.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+//                @Override
+//                public void onSeekComplete(MediaPlayer mp) {
+//
+//                }
+//            });
         }
     }
 
@@ -586,11 +793,34 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         public boolean onError(MediaPlayer mp, int what, int extra) {
             Toast.makeText(SystemVideoPlayer.this, "播放出错了", Toast.LENGTH_SHORT).show();
             //1.播放的视频格式不支持--跳转到万能播放器继续播放
-            //startVitamioPlayer();
+            startVitamioPlayer();
             //2.播放网络视频的时候，网络中断---1.如果网络确实断了，可以提示用于网络断了；2.网络断断续续的，重新播放
             //3.播放的时候本地文件中间有空白---下载做完成
-            return false;
+            return true;
         }
+    }
+
+    /**
+     * 把数据原封不动的传入Vitamio
+     */
+    private void startVitamioPlayer() {
+        if (videoview!=null){
+            videoview.stopPlayback();
+        }
+
+        Intent intent = new Intent(this,VitamioVideoPlayer.class);
+
+        if(mediaItems != null && mediaItems.size()>0){
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("videolist",mediaItems);
+            intent.putExtras(bundle);
+            intent.putExtra("position",position);
+        }else if (uri != null){
+            intent.setData(uri);
+        }
+        startActivity(intent);
+
+        finish();//关闭页面
     }
 
     class MyOnCompletionListener implements MediaPlayer.OnCompletionListener {
@@ -617,6 +847,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
 
     @Override
     protected void onResume() {
+
         super.onResume();
         LogUtil.e("onResume--");
     }
@@ -646,11 +877,69 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
 
     }
 
+    /**
+     * 开始位置
+     */
+    private float startv;
+    /**
+     * 滑动距离
+     */
+    private float touchRang;
+    /**
+     * 当前音量
+     */
+    private int mVol;
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         //3.把事件传递给手势识别器
         detector.onTouchEvent(event);
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:   //手指按下
+                //1.记录当前值
+                startv = event.getY();
+                mVol = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+                touchRang = Math.min(screenHeight,screenWidth);
+                handler.removeMessages(HIDE_MEDIACONTROLLER);
+
+                break;
+            case MotionEvent.ACTION_MOVE:   //手指移动
+
+                float endY = event.getY();
+                float distanceY = startv - endY;
+                float delta = (distanceY/touchRang)*maxVoice;
+                int voice = (int) Math.min(Math.max(0,mVol+delta),maxVoice);
+                if(delta!=0){
+                    updataVoice2(voice,false);
+                }
+                break;
+            case MotionEvent.ACTION_UP:     //手指离开
+                handler.sendEmptyMessageDelayed(HIDE_MEDIACONTROLLER,1000);
+                break;
+        }
+
         return super.onTouchEvent(event);
+    }
+
+    /**
+     * 监听物理键，实现声音的调节大小
+     * @param keyCode
+     * @param event
+     * @return
+     */
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
+            currentVoice--;
+            updataVoice2(currentVoice,false);
+            return true;
+        }else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP){
+            currentVoice++;
+            updataVoice(currentVoice,false);
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
     }
 
     /**

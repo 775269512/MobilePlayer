@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">呃喂呃喂</string>
+    <string name="player_name">AiviAivi（系统推荐！）</string>
     <string name="loading">AiviAivi\n正在启动...</string>
     <string name="radio_button1">本地AV</string>
     <string name="radio_button2">淫秽语音</string>
@@ -13,4 +14,5 @@
     <string name="tv_system_time">12:00</string>
     <string name="tv_current_time">00:00</string>
     <string name="tv_duration">20:00</string>
+    <string name="tv_buffer">AV正在缓冲..30kb/s</string>
 </resources>

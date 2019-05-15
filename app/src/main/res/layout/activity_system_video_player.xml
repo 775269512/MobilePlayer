@@ -12,4 +12,7 @@
         android:layout_height="match_parent"/>
 
     <include layout="@layout/medua_controller"/>
+    <include layout="@layout/buffer" android:id="@+id/ll_buffer"/>
+
+    <include layout="@layout/ll_loading" android:id="@+id/ll_loading"/>
 </RelativeLayout>
