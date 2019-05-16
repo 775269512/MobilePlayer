@@ -880,6 +880,9 @@ public class VitamioVideoPlayer extends Activity implements View.OnClickListener
 
     @Override
     protected void onDestroy() {
+        //移除所有消息
+        handler.removeCallbacksAndMessages(null);
+
         //先释放子类，再释放父类
         if(receiver != null){
             unregisterReceiver(receiver);

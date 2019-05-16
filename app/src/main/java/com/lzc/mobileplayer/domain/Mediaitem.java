@@ -20,6 +20,10 @@ public class MediaItem implements Serializable {
 
     private String artist;
 
+    private String imageUrl;
+
+    private String desc;
+
 
     public long getDuration() {
         return duration;
@@ -61,6 +65,22 @@ public class MediaItem implements Serializable {
         this.data = data;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
     @Override
     public String toString() {
         return "MediaItem{" +
@@ -69,6 +89,8 @@ public class MediaItem implements Serializable {
                 ", size=" + size +
                 ", data='" + data + '\'' +
                 ", artist='" + artist + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", desc='" + desc + '\'' +
                 '}';
     }
 }

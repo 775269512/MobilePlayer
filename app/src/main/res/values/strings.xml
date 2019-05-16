@@ -8,11 +8,21 @@
     <string name="radio_button4">邪恶段子</string>
     <string name="tv_name">视频的名称</string>
     <string name="tv_nomedia">没有发现视频</string>
+    <string name="tv_net">网络中断了..</string>
     <string name="tv_time">视频的时长</string>
     <string name="tv_size">视频的大小</string>
     <string name="video_name">视频的名字</string>
+    <string name="video_desc">视频的描述</string>
     <string name="tv_system_time">12:00</string>
     <string name="tv_current_time">00:00</string>
     <string name="tv_duration">20:00</string>
     <string name="tv_buffer">AV正在缓冲..30kb/s</string>
+    <string name="hello">Hello World, XListViewActivity!</string>
+
+    <string name="xlistview_header_hint_normal">下拉刷新</string>
+    <string name="xlistview_header_hint_ready">松开刷新数据</string>
+    <string name="xlistview_header_hint_loading">正在加载...</string>
+    <string name="xlistview_header_last_time">上次更新时间：</string>
+    <string name="xlistview_footer_hint_normal">查看更多</string>
+    <string name="xlistview_footer_hint_ready">松开载入更多</string>
 </resources>
