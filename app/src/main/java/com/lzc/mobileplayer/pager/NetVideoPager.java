@@ -272,7 +272,17 @@ public class NetVideoPager extends BasePager {
      */
     private ArrayList<MediaItem> parseJson(String json) {
         ArrayList<MediaItem> mediaItems = new ArrayList<>();
-        
+
+        //一个黄色数据
+        MediaItem media = new MediaItem();
+        media.setImageUrl("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec" +
+                "=1558270874144&di=b8fb657481bc346828c1414876ebddc4&imgtype=0&src" +
+                "=http%3A%2F%2Fs14.sinaimg.cn%2Fmw690%2F005NkUZ8gy6NaoKygYBbd%26690");
+        media.setData("https://ddr8v13bs4e1n.cloudfront.net/A185841_S876929.mp4");
+        media.setName("别点开！");
+        media.setDesc("黄色数据测试，别点！！");
+        mediaItems.add(media);
+
         try {
             JSONObject jsonObject = new JSONObject(json);
             JSONArray jsonArray = jsonObject.optJSONArray("trailers");
