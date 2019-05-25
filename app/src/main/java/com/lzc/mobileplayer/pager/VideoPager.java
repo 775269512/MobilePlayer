@@ -56,7 +56,7 @@ public class VideoPager extends BasePager {
             if (mMediaItems != null && mMediaItems.size() > 0) {
                 //有数据
                 //设置适配器
-                videoPagerAdapter = new VideoPagerAdapter(context, mMediaItems);
+                videoPagerAdapter = new VideoPagerAdapter(context, mMediaItems,true);
                 mListView.setAdapter(videoPagerAdapter);
                 //把文本隐藏
                 tv_nomedia.setVisibility(View.GONE);

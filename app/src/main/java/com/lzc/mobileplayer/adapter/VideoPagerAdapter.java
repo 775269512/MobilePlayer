@@ -25,6 +25,7 @@ import java.util.ArrayList;
 
 public class VideoPagerAdapter extends BaseAdapter {
 
+    private final boolean isVideo;
     private Context context;
     private final ArrayList<MediaItem> mediaItems;
     private Utils utils;
@@ -39,9 +40,10 @@ public class VideoPagerAdapter extends BaseAdapter {
     private LruCache<String, BitmapDrawable> mMemoryCache;
 
 
-    public VideoPagerAdapter(Context context,ArrayList<MediaItem> mediaItems){
+    public VideoPagerAdapter(Context context,ArrayList<MediaItem> mediaItems, boolean isVideo){
         this.context = context;
         this.mediaItems = mediaItems;
+        this.isVideo = isVideo;
         utils = new Utils();
         media = new MediaMetadataRetriever();
         int maxMemory = (int) Runtime.getRuntime().maxMemory();
@@ -95,18 +97,27 @@ public class VideoPagerAdapter extends BaseAdapter {
 //        bitmap = compressBitmap(bitmap,256);
 
         //viewHoder.iv_icon.setImageBitmap(bitmap);
+
         viewHoder.tv_name.setText(mediaItem.getName());
         viewHoder.tv_size.setText(Formatter.formatFileSize(context, mediaItem.getSize()));
         viewHoder.tv_time.setText(utils.stringForTime((int) mediaItem.getDuration()));
 
-        BitmapDrawable drawable = getBitmapFromMemoryCache(mediaItem.getData());
-        if (drawable != null) {
-            viewHoder.iv_icon.setImageBitmap(bitmap);
-        } else {
-            BitmapWorkerTask task = new BitmapWorkerTask(viewHoder.iv_icon);
-            task.execute(mediaItem.getData());
-            Log.e("mmmmmmm","sssssssssssssssssssssssss");
+
+        if(!isVideo){
+            //音频
+            viewHoder.iv_icon.setImageResource(R.drawable.music_default_bg);
+        }else {
+            //视频
+            BitmapDrawable drawable = getBitmapFromMemoryCache(mediaItem.getData());
+            if (drawable != null) {
+                viewHoder.iv_icon.setImageBitmap(bitmap);
+            } else {
+                BitmapWorkerTask task = new BitmapWorkerTask(viewHoder.iv_icon);
+                task.execute(mediaItem.getData());
+                Log.e("mmmmmmm","sssssssssssssssssssssssss");
+            }
         }
+
 
         return convertView;
     }
